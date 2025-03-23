@@ -1,0 +1,13 @@
+cmake .. -DClient=ON  //is client
+cmake .. -DClient=OFF //is Server
+
+cmake --build . --config release
+cmake --install . --config release --prefix "source_dir"
+
+//server
+cd CSChat\Server\bin
+Server.exe ip port  
+
+//client
+cd CSChat\Client\bin
+Client.exe ip port 

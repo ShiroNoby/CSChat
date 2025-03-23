@@ -1,0 +1,145 @@
+1. _network_module [
+    1.1 CSClient.h [
+        1.1.1 class CSClient [
+            1.1.1.1 WSADATA wsaData;
+            1.1.1.2 int iResult;
+            1.1.1.3 struct addrinfo* result = NULL;
+            1.1.1.4 SOCKET ConnectSocket = INVALID_SOCKET;
+            1.1.1.5 CSClient()
+            1.1.1.6 ~CSClient()
+            1.1.1.7 int Create(const char* ip, const char* port)
+            1.1.1.8 int Connect()
+            1.1.1.9 int shutdown()
+        ] //CSClient
+    ] //CSClient.h
+    1.2 CSPacket.h [
+        1.2.1 #define STRSIZE
+        1.2.2 namespace Packet [
+            1.2.2.1 struct MSG [
+                1.2.2.1.1 char data[STRSIZE] = " ";
+            ] //MSG
+            1.2.2.2 enum Cmd
+            1.2.2.3 struct command [
+                1.2.2.3.1 char cmd;
+            ] //command
+            1.2.2.4 struct hardPacket [
+                1.2.2.4.1 char          countPacket;
+                1.2.2.4.2 const char    cmd[6] = "start";
+            ] //hardPacket
+            1.2.2.5 struct packet [
+                1.2.2.5.1 char data[STRSIZE] = "";
+            ] //packet
+            1.2.2.6 struct HP [
+                1.2.2.6.1 const char cmd[4] = "end";
+            ] //HP
+            1.2.2.7 struct initDevice [
+                1.2.2.7.1 char name_device[3] = "";
+                1.2.2.7.2 char name_acaunt[8] = "";
+            ] //initDevice
+        ] //Packet
+        1.2.3 enum Type
+        1.2.4 struct Header [
+            1.2.4.1 char myName[3] = "";
+            1.2.4.2 char otherName[3] = "";
+            1.2.4.3 Header()
+            1.2.4.4 Header(char name[2])
+            1.2.4.5 Header(char name[2], char otherName[2])
+        ] //Header
+        1.2.5 struct CSPacket [
+            1.2.5.1 Type        type        = Type::Msg;
+            1.2.5.2 Header      header;
+            1.2.5.3 char        data[STRSIZE]   = " ";
+        ] //CSPacket
+    ] //CSPacket.h
+    1.3 CSReciver.h [
+        1.3.1 class CSReciver [
+            1.3.1.1 int send(SOCKET client, CSPacket* packet)
+            1.3.1.2 int recv(SOCKET client, CSPacket* packet)
+        ] //CSReciver
+    ] //CSReciver.h
+    1.4 CSServer.h [
+        1.4.1 class CSServer [
+            1.4.1.1 WSADATA wsaData;
+            1.4.1.2 int iResult;
+            1.4.1.3 struct addrinfo* result = NULL;
+            1.4.1.4 SOCKET client = INVALID_SOCKET;
+            1.4.1.5 SOCKET ListenSocket = INVALID_SOCKET;
+            1.4.1.6 CSServer()
+            1.4.1.7 ~CSServer()
+            1.4.1.8 int Create(const char* port)
+            1.4.1.9 int Create(const char* ip, const char* port)
+            1.4.1.10 int Listen()
+            1.4.1.11 int Disconect(SOCKET client)
+        ] //CSServer
+    ] //CSServer.h
+    1.5 Generals.h [
+        1.5.1 void logExit(const char* massage)
+        1.5.2 inline int CStrlen(const char* data)
+        1.5.3 int CStr(const char* from, char* to, int n)
+        1.5.4 int toCSTR(const char* from, char* to, int n)
+        1.5.5 int CStrCmp(const char* LStr, const char* RStr)
+    ]
+] //_network_module
+2. Client [
+    2.1 CSchat.h [
+        2.1.1 #define PROCSTART
+        2.1.2 #define PROCEND
+        2.1.3 char              name[3] = "";
+        2.1.4 char              otherName[3] = "";
+        2.1.5 char              end[] = "end";
+        2.1.6 std::atomic_bool  chat = false;
+        2.1.7 CSReciver         rcv;
+        2.1.8 CSClient*         m_client;
+        2.1.9 class CSChat [
+            2.1.9.1 CSChat(CSClient* client)
+            2.1.9.2 static void recv()
+            2.1.9.3 static void imput()
+        ] //CSChat
+    ] //CSchat.h
+    2.2 CSSuportCmd.h [
+        2.2.1 #define ClientCMDX(x)
+        2.2.2 #define ClientCMDY(x,y)
+        2.2.3 #define ClientCMDZ(x,y,z)
+        2.2.4 CSReciver res;
+        2.2.5 CSPacket command_init( CSClient* client)
+        2.2.6 void command_disconnect(CSClient* client)
+    ] //CSSuportCmd.h
+] //Client
+3. Server [
+    3.1 CSCard.h [
+        //usless now
+    ] //CSCard.h
+    3.2 CSClients.h [
+        3.2.1 struct Client [
+            3.2.1.1 SOCKET  client;
+            3.2.1.2 char    name[3] = "";
+        ] //Client
+        3.2.2 class CSClients  [
+            3.2.2.1 std::mutex              CP;
+            3.2.2.2 std::vector<Client>     clients;
+            3.2.2.3 std::vector<Client>     tmp;
+            3.2.2.4 std::atomic_bool        change = false;
+            3.2.2.5 int                     largest_sock = 0;
+            3.2.2.6 void add(SOCKET client, char name[3])
+            3.2.2.7 void forSelect(fd_set* set)
+            3.2.2.8 int getlargestSocket()
+            3.2.2.9 Client find(const char name[3] = "")
+            3.2.2.10 Client find(SOCKET client)
+            3.2.2.11 void del(SOCKET connectClient)
+            3.2.2.12 int getSize()
+        ] //CSClients
+    ] //CSClients.h
+    3.3 CSTicket.h [
+        3.3.1 struct ticket [
+            3.3.1.1 CSPacket pct;
+            3.3.1.2 SOCKET client;
+        ] //ticket
+        3.3.2 class CSTickets  [
+            3.3.2.1 std::mutex          TP;
+            3.3.2.2 std::deque<ticket>  tick;
+            3.3.2.3 void add(SOCKET *client, CSPacket* pct)
+            3.3.2.4 ticket getTicket()
+            3.3.2.5 int size()
+        ] //CSTickets
+    ] //CSTicket.h
+] //Server
